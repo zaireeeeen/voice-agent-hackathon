@@ -21,10 +21,11 @@ A worker on a scaffold, hands full, asks a question out loud. The agent answers 
 | Path | What it is |
 |---|---|
 | [`docs/DATA-SOURCES.md`](docs/DATA-SOURCES.md) | The source register. Every external source the agent can cite, ranked by authority, each verified live |
-| [`docs/FINDINGS.md`](docs/FINDINGS.md) | Two defects found by verifying rather than assuming. Both reproducible |
+| [`docs/FINDINGS.md`](docs/FINDINGS.md) | Three findings. Two build defects, and what the data layer would need to sell outside the launch market |
 | [`docs/SUBMISSION-REQUIREMENTS.md`](docs/SUBMISSION-REQUIREMENTS.md) | The official deliverables, transcribed from the submission desk |
 | [`docs/devin-log.md`](docs/devin-log.md) | What we asked Devin, what came back, what we'd ask differently |
-| [`scripts/check_sources.mjs`](scripts/check_sources.mjs) | Probes all 13 sources live, cross-checks them against each other, prints the go/no-go verdict |
+| [`scripts/check_sources.mjs`](scripts/check_sources.mjs) | Probes all 13 launch-market sources live, cross-checks them against each other, prints the go/no-go verdict |
+| [`scripts/check_regional_sources.mjs`](scripts/check_regional_sources.mjs) | Probes 31 occupational-safety authorities across 12 markets, for the worldwide expansion case |
 
 ## The rule everything here serves
 

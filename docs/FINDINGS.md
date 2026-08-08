@@ -1,6 +1,8 @@
 # Findings
 
-Two defects, found by verifying assumptions rather than accepting them. Both reproducible from this repo or [ssuvorin/BUILDERS-3](https://github.com/ssuvorin/BUILDERS-3).
+Three findings, reached by verifying assumptions rather than accepting them. All reproducible from this repo or [ssuvorin/BUILDERS-3](https://github.com/ssuvorin/BUILDERS-3).
+
+Findings 1 and 2 are build defects, both since fixed. Finding 3 is structural: what the data layer would need to sell outside the launch market.
 
 Found 8 August 2026 during the build window. Recorded here because the reasoning is the interesting part, not the fix.
 
@@ -69,8 +71,73 @@ Two further gaps if Set B is adopted: banded thresholds cannot be represented by
 
 ---
 
+## Finding 3: the data layer is UAE-shaped, and the product is not
+
+The UAE is the launch market. HeatSafe is a B2B product for frontline safety in high-risk environments, and nothing about that is regional. So the question is not "does it work in Dubai", it is "what breaks the first time we sell into a second country".
+
+Three things break. Two are cheap. One is the product.
+
+### 3a. Bring your own documentation, as long as you write it like Meridian
+
+The threshold parser reads a specific document. Not a specific *format*, a specific *wording*: the literal words `Restricted` and `Elevated` as table row labels, the phrase `stop at N mph sustained`, the phrase `prohibited between HH:MM and HH:MM`, and English month names.
+
+I fed it three SOPs carrying the **same policy content**, worded the way a different client would write it:
+
+| Client variant | Result |
+|---|---|
+| US contractor. Fahrenheit, bands labelled "Level 2 / Level 3", 12-hour clock | **no policy parsed** |
+| UK contractor. km/h only, bands labelled "Green / Amber / Red" | **no policy parsed** |
+| Spanish-language client. Identical structure, Spanish labels | **no policy parsed** |
+
+When no policy parses, the verdict layer returns `unknown` and every conditions question is answered *"No weather policy found in the loaded SOPs."* Correct failure behaviour, and a completely unusable product.
+
+This matters more than it looks, because "the customer uploads their own documents and the agent follows their rules" **is** the pitch. Right now the honest version of that sentence is "the customer uploads documents written to our template." Every new customer is a regex change, which means onboarding is engineering work, which is the thing that stops a per-seat SaaS model from scaling.
+
+The fix is not a better regex. It is an extraction pass that reads a policy document into a typed structure once, at upload time, and stores the result: an LLM call producing `{band, sustained, gusts, action}` rows with the source span attached, verified against the document rather than pattern-matched out of it. That converts onboarding from a code change into a data operation, and it is the honest answer to "how does this scale to a thousand contractors".
+
+### 3b. Jurisdiction is hardcoded in three places
+
+| Where | What | Consequence outside the UAE |
+|---|---|---|
+| `verdict.py` | `_SITE_TZ = ZoneInfo("Asia/Dubai")` | Every time-of-day rule evaluates in Gulf time |
+| `config.py` | `SITE_LOCATION` defaults to `Dubai` | Weather fetched for the wrong city until overridden |
+| `policy.py` | English month names, `mph` and `°C` only | Any other language or unit system yields nothing |
+
+All three are small. They are listed because "small and unnoticed" is exactly how a demo that works in one city ships as a product that works in one city.
+
+### 3c. The regional source tier, verified
+
+Probed with `scripts/check_regional_sources.mjs`. **28 of 31 authorities reachable, across 12 markets.**
+
+| Market | Authorities | Reachable |
+|---|---|---|
+| GCC | UAE MOHRE, u.ae, NCM, Dubai Municipality, Saudi HRSD, Qatar MOL | 5/6 |
+| UK | HSE, legislation.gov.uk, NASC, Met Office | 4/4 |
+| EU | EU-OSHA, EUR-Lex 92/57/EEC, EUR-Lex 89/391/EEC | 3/3 |
+| US | OSHA construction standards, OSHA heat, NIOSH, NWS | 4/4 |
+| Canada | CCOHS | 1/1 |
+| Australia | Safe Work Australia, SafeWork NSW, BOM | 3/3 |
+| Singapore | MOM | 1/1 |
+| India | DGFASLI, IMD | 2/2 |
+| Brazil | gov.br | 1/1 |
+| South Africa | Dept of Employment and Labour | 1/1 |
+| Japan | MHLW | 0/1 |
+| Global | ILO, WMO, Open-Meteo, ISO | 3/4 |
+
+**What generalises for free.** Open-Meteo is worldwide, needs no key, and returns the same fields anywhere, so the live-conditions tier costs nothing per market. The precedence model, company policy above regulation above manufacturer above general web, is jurisdiction-neutral. So is the refusal behaviour.
+
+**What does not.** The *shape* of the binding rule differs by market, and each one has to be read from that market's own authority rather than assumed. Several GCC states operate summer working-hours restrictions, the US works through heat-index-based guidance, and parts of Asia and Australia use wet-bulb globe temperature. Those are different rule structures, not different numbers in the same structure, and none of them should be written into a pitch until they have been checked against the source. That is the same discipline the product applies to itself.
+
+**And some sources cannot be scraped at all.** The ISO 45001 page returned 403. ISO standards are licensed documents, and the same is true of parts of the NASC and BSI catalogues. Any market where the binding standard sits behind a licence is a procurement line item, not a retrieval problem. Worth pricing before promising.
+
+### What this is worth saying out loud
+
+The deck prices a per-worker SaaS across the GCC and beyond. The retrieval layer currently supports one customer's documents in one language in one timezone. That gap is not a criticism of a six-hour build, it is the roadmap, and naming it precisely is more convincing than implying it does not exist.
+
+---
+
 ## Method
 
-Neither finding came from reading the code and reasoning about it. Both came from running the thing and reading what actually came back: the provider's raw response keys, and the real regex against the real files. The reasoning-only version of each conclusion was available hours earlier and would have been wrong in the details that mattered.
+None of these findings came from reading the code and reasoning about it. Both came from running the thing and reading what actually came back: the provider's raw response keys, and the real regex against the real files. The reasoning-only version of each conclusion was available hours earlier and would have been wrong in the details that mattered.
 
-`scripts/check_sources.mjs` exists so this stays cheap to repeat. It re-probes every source, cross-checks the providers against each other, and prints the live verdict in about 15 seconds.
+`scripts/check_sources.mjs` and `scripts/check_regional_sources.mjs` exist so this stays cheap to repeat. It re-probes every source, cross-checks the providers against each other, and prints the live verdict in about 15 seconds.
