@@ -1,33 +1,51 @@
-# Voice Agent (Hackathon)
+# HeatSafe Voice Copilot, data and verification workstream
 
-A voice-first AI agent that knows something real about the world, right now.
+My working repo from **[Dubai AI Hub] Builder Lab #3: Voice Agents Hackathon**, Dubai, 8 August 2026. Team 24.
 
-Built at **[Dubai AI Hub] Builder Lab #3: Voice Agents Hackathon** — Dubai, 8 August 2026.
+**The team's submission repo is [ssuvorin/BUILDERS-3](https://github.com/ssuvorin/BUILDERS-3).** This repo is not the submission and does not claim to be. It holds the workstream I owned: the external data sources the agent depends on, the live verification tooling, and the defects that verification found.
 
-## The stack
+## The project
 
-| Layer | Tool | What it does here |
-|---|---|---|
-| Voice in / voice out | **ElevenLabs Agents** | Speech-to-text, turn-taking, text-to-speech |
-| Live world knowledge | **Context.dev** | Reads the live web and returns clean, LLM-ready text |
-| Engineering | **Devin** (Cognition) | Writes the code and opens the pull requests |
+HeatSafe Technologies (us, fictional vendor) builds voice-first operational safety copilots for frontline teams in high-risk environments. Meridian Construction LLC (the client, fictional) runs sites in the UAE.
 
-## Team 24
+A worker on a scaffold, hands full, asks a question out loud. The agent answers from **Meridian's own SOPs**, checks **live weather** against thresholds read out of those SOPs, names its source, and refuses anything no source covers. It advises. It never decides. Stop/go calls belong to the supervisor.
 
-Silvia Mogas · Ankita Biswas · Sergei Suvorin · Sahand Sorouri · Lucy Scott Brown
+| Layer | Tool |
+|---|---|
+| Voice in and out | ElevenLabs Agents |
+| Live web data | context.dev |
+| Engineering | Devin |
 
-## What it does
+## What's here
 
-*To be filled in once the idea is locked at 9:45am.*
+| Path | What it is |
+|---|---|
+| [`docs/DATA-SOURCES.md`](docs/DATA-SOURCES.md) | The source register. Every external source the agent can cite, ranked by authority, each verified live |
+| [`docs/FINDINGS.md`](docs/FINDINGS.md) | Two defects found by verifying rather than assuming. Both reproducible |
+| [`docs/SUBMISSION-REQUIREMENTS.md`](docs/SUBMISSION-REQUIREMENTS.md) | The official deliverables, transcribed from the submission desk |
+| [`docs/devin-log.md`](docs/devin-log.md) | What we asked Devin, what came back, what we'd ask differently |
+| [`scripts/check_sources.mjs`](scripts/check_sources.mjs) | Probes all 13 sources live, cross-checks them against each other, prints the go/no-go verdict |
 
-## Running it locally
+## The rule everything here serves
+
+> Do not invent a figure, threshold, spec or procedure that is not in a retrieved source.
+
+In a domain where people work at height, a confidently wrong number is worse than no answer. So every figure the agent speaks has to trace back to a named source, and the sources themselves have to be checked rather than trusted. That is what this repo is.
+
+## Run the source check
+
+Node 18+. No dependencies, no API keys.
 
 ```bash
-cp .env.example .env   # add your own keys
+node scripts/check_sources.mjs
 ```
 
-Keys are never committed. See `.env.example` for what's needed.
+Probes live conditions, UAE regulatory sources and official guidance, cross-checks the weather providers against each other, and prints what the agent should say right now against the client's thresholds.
 
-## How we steered the tools
+## Credits
 
-Every task given to Devin, and what came back, is logged in [`docs/devin-log.md`](docs/devin-log.md).
+Team 24: Silvia Mogas, Sergei Suvorin, Sahand Sorouri, Lucy Scott Brown, Ankita Biswas.
+
+The Meridian SOP set is Lucy Scott Brown's work. The backend, agent config and eval suite are Sergei Suvorin's. This repo covers the data layer only.
+
+Fictional company, fictional client, fictional thresholds. Not operational safety advice.
