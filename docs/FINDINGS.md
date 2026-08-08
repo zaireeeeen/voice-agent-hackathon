@@ -1,8 +1,8 @@
 # Findings
 
-Three findings, reached by verifying assumptions rather than accepting them. All reproducible from this repo or [ssuvorin/BUILDERS-3](https://github.com/ssuvorin/BUILDERS-3).
+Four findings, reached by verifying assumptions rather than accepting them. All reproducible from this repo or [ssuvorin/BUILDERS-3](https://github.com/ssuvorin/BUILDERS-3).
 
-Findings 1 and 2 are build defects, both since fixed. Finding 3 is structural: what the data layer would need to sell outside the launch market.
+Findings 1 and 2 are build defects, both since fixed. Finding 3 is structural: what the data layer would need to sell outside the launch market. Finding 4 is a product gap: the second-most-asked user question has no flow.
 
 Found 8 August 2026 during the build window. Recorded here because the reasoning is the interesting part, not the fix.
 
@@ -133,6 +133,33 @@ Probed with `scripts/check_regional_sources.mjs`. **28 of 31 authorities reachab
 ### What this is worth saying out loud
 
 The deck prices a per-worker SaaS across the GCC and beyond. The retrieval layer currently supports one customer's documents in one language in one timezone. That gap is not a criticism of a six-hour build, it is the roadmap, and naming it precisely is more convincing than implying it does not exist.
+
+---
+
+## Finding 4: the second-most-asked question has no flow
+
+Frontline users ask three things, and every one of them has to be answerable hands-free:
+
+| | The question | What the user supplies | Status |
+|---|---|---|---|
+| **Q1** | *"How do I do this?"* | What they want to achieve, and what they have to hand | Covered |
+| **Q2** | *"I'm part-way through this and stuck. How do I get it done?"* | What they were doing, and what they originally wanted to achieve | **No flow** |
+| **Q3** | *"Is it safe for me to do this now?"* | What they want to do, asked against current conditions | Covered, and it's the flagship |
+
+Q1 maps onto procedure retrieval. Q3 maps onto the decision-deferral flow, the one that never answers on its own authority. Q2 maps onto nothing. The user-flow spec runs A through I and covers tags, limits, the midday break, wind bands, the sail rule, post-sandstorm restart, refusal, decision deferral and ambiguity. None of them is *"I already started and it's gone wrong."*
+
+**Q2 is not a rephrasing of Q1.** The difference is state:
+
+- Q1 asks about a task that has not begun. The answer is a procedure from the top.
+- Q2 asks about a task already in progress, described partially and usually inaccurately, by someone who wants to finish rather than start over. *"I've got the boards up but there's a tie missing"* is not the question *"how do I erect a scaffold."*
+
+That changes what a correct answer looks like. Retrieval has to reason over a described partial state, and the right response is frequently **not** the next step. It is often *"stop, what you have described is a non-compliant state, here is who to call"* — which is closer to the refusal path than the procedure path, and which nobody would discover by building Q1 and assuming Q2 falls out of it.
+
+**Q2 is also the highest-risk question in the set.** The user is mid-task, under time pressure, invested in finishing, and therefore the most likely person to accept a plausible wrong answer and act on it. Every property that makes the refusal behaviour valuable is at maximum here.
+
+**Where this got hidden.** The pitch describes two use cases, "should we do this now" and "how do I do this." That framing folds Q2 into Q1 and the gap disappears on the slide. The demo video script opens with the words *"construction workers get stuck mid-task"* — the exact phrase — and then demonstrates a Q1 flow, because a Q2 flow does not exist to demonstrate.
+
+Naming a third question is cheap. It costs one flow, it reuses the coverage gate and the escalation path already built, and it turns a phrase already in the script into something the product can actually do.
 
 ---
 

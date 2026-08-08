@@ -6,6 +6,16 @@ My working repo from **[Dubai AI Hub] Builder Lab #3: Voice Agents Hackathon**, 
 
 ## The project
 
+**HeatSafe solves a real frontline problem: workers need fast access to the right safety procedures, company rules and live site conditions without stopping work to search through documents. The strongest initial market is UAE construction, where extreme weather, strict HSE requirements and large frontline workforces create a sharp need for verified, voice-first operational guidance at the point of work.**
+
+The three questions users actually ask, all of which have to work hands-free:
+
+1. **How do I do this?** — they say what they want to achieve and what they have to hand
+2. **I'm part-way through and stuck. How do I get it done?** — they say what they were doing and what they originally wanted
+3. **Is it safe for me to do this now?** — they say what they want to do, and ask against live conditions
+
+Question 3 is the one the product must never answer on its own authority. Question 2 is the one currently missing a flow, which is [Finding 4](docs/FINDINGS.md).
+
 HeatSafe Technologies (us, fictional vendor) builds voice-first operational safety copilots for frontline teams in high-risk environments. Meridian Construction LLC (the client, fictional) runs sites in the UAE.
 
 A worker on a scaffold, hands full, asks a question out loud. The agent answers from **Meridian's own SOPs**, checks **live weather** against thresholds read out of those SOPs, names its source, and refuses anything no source covers. It advises. It never decides. Stop/go calls belong to the supervisor.
